@@ -15,6 +15,36 @@ A Streamlit-based interactive dashboard that compares Standard Dijkstra and Powe
 
 ---
 
+## ⚖️ Standard Dijkstra vs Power-Aware Dijkstra — What's the Difference?
+
+Imagine you're finding the fastest route from your house to all other houses in a city.
+
+- 🧭 **Standard Dijkstra**  
+  Just finds the shortest path in terms of distance.  
+  It doesn’t care about traffic, road conditions, or energy availability — it just looks for the lowest number.
+
+- ⚡ **Power-Aware Dijkstra**  
+  It still tries to find the best path, but it also checks how much "power" is available on each road.  
+  If a path has low energy availability (like a weak or unstable energy line), it avoids it — even if it’s shorter.  
+  This is more realistic in smart grids where we care about power flow and stability.
+
+---
+
+### 💡 How It's Used in This Dashboard
+
+- Both algorithms start from the same source node.
+- They calculate the shortest paths to all other nodes.
+- This dashboard helps you compare:
+  - 🟦 The cost to reach each node (Standard vs Power-Aware)
+  - 📈 How much improvement (or loss) is observed with power-awareness
+  - ⏱ Execution time to evaluate performance
+- Visualizations include:
+  - Bar charts 📊 comparing costs and improvements
+  - Percentage improvement calculations 🔢
+  - Step-by-step traversal animations 🧭
+
+---
+
 ## 📁 Project Structure
 
 ```
