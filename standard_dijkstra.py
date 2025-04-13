@@ -6,6 +6,7 @@ class SmartGridGraph:
         self.num_nodes = num_nodes
         self.edges = {i: [] for i in range(num_nodes)}
         self.graph = nx.Graph()
+        self.edge_list = []
         self._generate_random_edges(connection_density)
 
     def _generate_random_edges(self, density):
@@ -17,6 +18,7 @@ class SmartGridGraph:
                     self.edges[i].append((j, weight))
                     self.edges[j].append((i, weight))
                     self.graph.add_edge(i, j, weight=weight)
+                    self.edge_list.append((i, j, weight))
 
     def dijkstra(self, source):
         dist = {node: float('inf') for node in range(self.num_nodes)}
@@ -38,7 +40,7 @@ class SmartGridGraph:
         paths = {node: self._reconstruct_path(prev, source, node) for node in range(self.num_nodes)}
         return dist, paths, steps
 
-    def _reconstruct_path(self, prev, src, tgt):    
+    def _reconstruct_path(self, prev, src, tgt):
         path = []
         while tgt is not None:
             path.insert(0, tgt)
@@ -47,6 +49,9 @@ class SmartGridGraph:
 
     def get_graph(self):
         return self.graph
+
+    def get_edge_list(self):
+        return self.edge_list
 
     def random_source(self):
         return random.randint(0, self.num_nodes - 1)

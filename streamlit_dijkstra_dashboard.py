@@ -1,13 +1,13 @@
+# streamlit_dijkstra_dashboard.py
 import streamlit as st
 import networkx as nx
 import matplotlib.pyplot as plt
 import pandas as pd
 import time
 
-from standard_dijkstra import SmartGridGraph as StdGraph
-from power_aware_dijkstra import PowerAwareGraph as PowerGraph
+from standard_dijkstra import SmartGridGraph
+from power_aware_dijkstra import PowerAwareGraph
 
-# Streamlit Page Config
 st.set_page_config(layout='wide', page_title='⚡ SmartGrid: Dijkstra Comparison Dashboard')
 st.title("⚡ SmartGrid: Dijkstra Comparison Dashboard")
 
@@ -19,34 +19,19 @@ highlight_path = st.sidebar.checkbox("🔦 Highlight Shortest Path", value=False
 
 # Initialize Session State
 if "std_graph" not in st.session_state:
-    st.session_state.std_graph = StdGraph(num_nodes, density)
-    st.session_state.pow_graph = PowerGraph(num_nodes, density)
-
-    # Initialize fixed positions for graph layout if not already initialized
+    st.session_state.std_graph = SmartGridGraph(num_nodes, density)
+    edge_list = st.session_state.std_graph.get_edge_list()
+    st.session_state.pow_graph = PowerAwareGraph(num_nodes, edge_list)
     st.session_state.fixed_pos = nx.spring_layout(st.session_state.std_graph.get_graph(), seed=42)
 
-# Regenerate Graphs when the button is pressed
 def regenerate_graphs():
-    st.session_state.std_graph = StdGraph(num_nodes, density)
-    st.session_state.pow_graph = PowerGraph(num_nodes, density)
-
-    # Regenerate fixed positions for graph layout
+    st.session_state.std_graph = SmartGridGraph(num_nodes, density)
+    edge_list = st.session_state.std_graph.get_edge_list()
+    st.session_state.pow_graph = PowerAwareGraph(num_nodes, edge_list)
     st.session_state.fixed_pos = nx.spring_layout(st.session_state.std_graph.get_graph(), seed=42)
 
 if st.sidebar.button("🔁 Regenerate Graphs"):
     regenerate_graphs()
-
-# Live Node Addition
-with st.sidebar.expander("➕ Add New Node"):
-    new_node = st.number_input("Node ID", min_value=num_nodes, step=1)
-    target_node = st.number_input("Connect to Node", min_value=0, max_value=new_node-1, step=1)
-    weight = st.number_input("Edge Weight", min_value=1.0, value=5.0)
-
-    if st.button("Add Node to Graph"):
-        st.session_state.std_graph.add_node(new_node)
-        st.session_state.pow_graph.add_node(new_node)
-        st.session_state.std_graph.add_edge(new_node, target_node, weight)
-        st.session_state.pow_graph.add_edge(new_node, target_node, weight)
 
 # Dijkstra Execution
 def run_dijkstra(graph_obj, source):

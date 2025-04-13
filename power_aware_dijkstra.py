@@ -2,19 +2,17 @@ import random
 import networkx as nx
 
 class PowerAwareGraph:
-    def __init__(self, num_nodes, connection_density=0.5):
+    def __init__(self, num_nodes, edge_list, powers=None):
         self.num_nodes = num_nodes
         self.graph = nx.Graph()
-        self.powers = {i: round(random.uniform(0.5, 2.0), 2) for i in range(num_nodes)}
-        self._generate_random_edges(connection_density)
+        self.powers = powers or {i: round(random.uniform(0.5, 2.0), 2) for i in range(num_nodes)}
+        self._use_edge_list(edge_list)
 
-    def _generate_random_edges(self, density):
-        for i in range(self.num_nodes):
-            for j in range(i+1, self.num_nodes):
-                if random.random() < density:
-                    base_cost = round(random.uniform(1.0, 10.0), 2)
-                    power_weighted_cost = round(base_cost / (self.powers[i] * self.powers[j]), 2)
-                    self.graph.add_edge(i, j, weight=power_weighted_cost)
+    def _use_edge_list(self, edge_list):
+        self.graph.add_nodes_from(range(self.num_nodes))
+        for u, v, base_cost in edge_list:
+            power_weighted_cost = round(base_cost / (self.powers[u] * self.powers[v]), 2)
+            self.graph.add_edge(u, v, weight=power_weighted_cost)
 
     def dijkstra(self, source):
         dist = {node: float('inf') for node in self.graph.nodes}
@@ -46,6 +44,9 @@ class PowerAwareGraph:
 
     def get_graph(self):
         return self.graph
+
+    def get_powers(self):
+        return self.powers
 
     def random_source(self):
         return random.choice(list(self.graph.nodes))
