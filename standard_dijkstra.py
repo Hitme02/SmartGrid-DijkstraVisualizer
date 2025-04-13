@@ -38,7 +38,7 @@ class SmartGridGraph:
         paths = {node: self._reconstruct_path(prev, source, node) for node in range(self.num_nodes)}
         return dist, paths, steps
 
-    def _reconstruct_path(self, prev, src, tgt):
+    def _reconstruct_path(self, prev, src, tgt):    
         path = []
         while tgt is not None:
             path.insert(0, tgt)

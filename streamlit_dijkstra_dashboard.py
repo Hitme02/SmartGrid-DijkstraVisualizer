@@ -20,13 +20,18 @@ highlight_path = st.sidebar.checkbox("🔦 Highlight Shortest Path", value=False
 # Initialize Session State
 if "std_graph" not in st.session_state:
     st.session_state.std_graph = StdGraph(num_nodes, density)
-if "pow_graph" not in st.session_state:
     st.session_state.pow_graph = PowerGraph(num_nodes, density)
 
-# Generate Random Graphs
+    # Initialize fixed positions for graph layout if not already initialized
+    st.session_state.fixed_pos = nx.spring_layout(st.session_state.std_graph.get_graph(), seed=42)
+
+# Regenerate Graphs when the button is pressed
 def regenerate_graphs():
     st.session_state.std_graph = StdGraph(num_nodes, density)
     st.session_state.pow_graph = PowerGraph(num_nodes, density)
+
+    # Regenerate fixed positions for graph layout
+    st.session_state.fixed_pos = nx.spring_layout(st.session_state.std_graph.get_graph(), seed=42)
 
 if st.sidebar.button("🔁 Regenerate Graphs"):
     regenerate_graphs()
@@ -62,7 +67,7 @@ col1, col2 = st.columns(2)
 with col1:
     st.subheader("📘 Standard Dijkstra Graph")
     fig, ax = plt.subplots()
-    pos = nx.spring_layout(std_nx)
+    pos = st.session_state.fixed_pos
     nx.draw(std_nx, pos, with_labels=True, node_color='skyblue', ax=ax)
     nx.draw_networkx_edge_labels(std_nx, pos, edge_labels={(u, v): d['weight'] for u, v, d in std_nx.edges(data=True)}, ax=ax)
     if highlight_path and dest_node in std_paths:
@@ -73,7 +78,7 @@ with col1:
 with col2:
     st.subheader("🔋 Power-Aware Dijkstra Graph")
     fig2, ax2 = plt.subplots()
-    pos2 = nx.spring_layout(pow_nx)
+    pos2 = st.session_state.fixed_pos
     nx.draw(pow_nx, pos2, with_labels=True, node_color='lightgreen', ax=ax2)
     nx.draw_networkx_edge_labels(pow_nx, pos2, edge_labels={(u, v): round(d['weight'], 2) for u, v, d in pow_nx.edges(data=True)}, ax=ax2)
     if highlight_path and dest_node in pow_paths:
@@ -110,3 +115,16 @@ st.json({"Visited": std_steps[step][0], "Distances": std_steps[step][1]})
 st.markdown("### 🧭 Power-Aware Dijkstra Traversal Animation")
 step2 = st.slider("Step (Power-Aware)", 0, len(pow_steps)-1, 0, key="pow_step")
 st.json({"Visited": pow_steps[step2][0], "Distances": pow_steps[step2][1]})
+
+# Shortest Path Display
+st.markdown("### 🛣️ Shortest Path Routes")
+
+st.markdown("#### 🔹 Standard Dijkstra Paths")
+for node in sorted(std_paths):
+    if node != source_node and std_paths[node]:
+        st.write(f"{source_node} ➝ {node} : {std_paths[node]} (Cost: {std_dist[node]})")
+
+st.markdown("#### 🔸 Power-Aware Dijkstra Paths")
+for node in sorted(pow_paths):
+    if node != source_node and pow_paths[node]:
+        st.write(f"{source_node} ➝ {node} : {pow_paths[node]} (Cost: {pow_dist[node]})")
